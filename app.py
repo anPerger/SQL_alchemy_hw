@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import create_engine, func
 
 from flask import Flask, jsonify
-
+import pandas as pd
 
 engine = create_engine("sqlite:///Resources/hawaii.sqlite")
 
@@ -78,23 +78,42 @@ def stations():
     session = Session(engine)
 
     """Return a list of passenger data including the name, age, and sex of each passenger"""
-    # Query all passengers
+    
     station_results = session.query(Stations.station, Stations.latitude, Stations.longitude, 
         Stations.elevation).all()
 
-
+    
     session.close()
 
     # Create a dictionary from the row data and append to a list of all_passengers
-    all_passengers = []
-    for name, age, sex in results:
-        passenger_dict = {}
-        passenger_dict["name"] = name
-        passenger_dict["age"] = age
-        passenger_dict["sex"] = sex
-        all_passengers.append(passenger_dict)
+    return jsonify(station_results)
 
-    return jsonify(all_passengers)
+@app.route("/api/v1.0/tobs")
+def tobs():
+    
+    session = Session(engine)
+
+    measurement_results = session.query(Measurements.station, Measurements.date,
+        Measurements.prcp, Measurements.tobs).all()
+  
+    measurement_dates = []
+    measurement_tobs = []
+    measurement_stations = []
+    
+    for result in measurement_results:
+        
+        measurement_date = result[1]
+        measurement_tob = result[3]
+        measurement_station = result[0]
+
+        measurement_dates.append(measurement_date)
+        measurement_tobs.append(measurement_tob)
+        measurement_stations.append(measurement_station)
+    
+    
+    print(station_counts)
+
+    return jsonify(station_counts)
 
 
 if __name__ == '__main__':
