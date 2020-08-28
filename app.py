@@ -42,31 +42,46 @@ def precipitation():
     measurement_results = session.query(Measurements.station, Measurements.date,
         Measurements.prcp, Measurements.tobs).all()
 
+     
     
-    for each result in measurement_results
+    measurement_dates = []
+    measurement_prcps = []
+   
+    for result in measurement_results:
+        
+        measurement_date = result[1]
+        measurement_prcp = result[2]
 
-    measurement_satation_id = [result[0] for result in measurement_results[:]]
-    measurement_date = [result[1] for result in measurement_results[:]]
-    prcp = [result[2] for result in measurement_results[:]]
-    tobs = [result[3] for result in measurement_results[:]]
+        measurement_dates.append(measurement_date)
+        measurement_prcps.append(measurement_prcp)
 
-    date_prcp = {f'date{measurement_date}' : prcp}
+        # date_prcp[measurement_date] = measurement_date
+        # date_prcp[prcp] = prcp
+
+    prcp_dict = {}
+    for date in range(len(measurement_dates)):
+        prcp_dict[measurement_dates[date]] = measurement_prcps[date]
+        
+    
+    
     session.close()
-    print(date_prcp)
+    print(prcp_dict)
     # Convert list of tuples into normal list
-    date_prcps = list(np.ravel(date_prcp))
+    date_prcps = list(np.ravel(prcp_dict))
 
     return jsonify(date_prcps)
 
 
-@app.route("/api/v1.0/passengers")
-def passengers():
+@app.route("/api/v1.0/stations")
+def stations():
     # Create our session (link) from Python to the DB
     session = Session(engine)
 
     """Return a list of passenger data including the name, age, and sex of each passenger"""
     # Query all passengers
-    results = session.query(Passenger.name, Passenger.age, Passenger.sex).all()
+    station_results = session.query(Stations.station, Stations.latitude, Stations.longitude, 
+        Stations.elevation).all()
+
 
     session.close()
 
