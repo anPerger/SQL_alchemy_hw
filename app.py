@@ -36,8 +36,7 @@ def welcome():
 def precipitation():
     # Create our session (link) from Python to the DB
     session = Session(engine)
-
-    """Return a list of all passenger names"""
+ 
     # Query all passengers
     measurement_results = session.query(Measurements.station, Measurements.date,
         Measurements.prcp, Measurements.tobs).all()
