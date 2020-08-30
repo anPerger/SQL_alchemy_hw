@@ -28,7 +28,8 @@ def welcome():
         f"Available Routes:<br/>"
         f"<a href='/api/v1.0/precipitation'>precipitation</a><br/>"
         f"<a href='/api/v1.0/stations'>stations</a><br/>"
-        f"<a href='/api/v1.0/tobs'>tobs</a>"
+        f"<a href='/api/v1.0/tobs'>tobs</a><br/>"
+        f"<a href='/api/v1.0/start date to end date'>start_to_end</a>"
     )
 
 
@@ -109,10 +110,22 @@ def tobs():
         measurement_tobs.append(measurement_tob)
         measurement_stations.append(measurement_station)
     
+     tobs_dict = {}
+    for date in range(len(measurement_dates)):
+        tobs_dict[measurement_dates[date]] = measurement_tobs[date]
     
-    print(station_counts)
+    print(tobs_dict)
 
-    return jsonify(station_counts)
+    return jsonify(tobs_dict)
+
+@app.route("/api/v1.0/start_to_end")
+def start_to_end():
+
+    session = Session(engine)
+
+    
+
+
 
 
 if __name__ == '__main__':
