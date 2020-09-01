@@ -25,16 +25,23 @@ app = Flask(__name__)
 def welcome():
     """List all available api routes."""
     return ("Welcome to my homepage! This is where I have information about this API.<br/>"
-            "the base route is '/api/v1.0/'<br/>"         
+        "<br/>"
+        "the base route is '/api/v1.0/'<br/>"
+        "<br/>"
+        "You can click on the links, or use the base URL route with your desired endpoint"         
         "You can access precipitation data in inches by date with the base route followed by 'precipitation'.<br/>"
-        "You can access station data with 'stations'.<br/>"
-        "Temperature observation data from the most recent year in the dataset is at 'tobs'<br/>"
-        "the final way to use this API is by inputting a "
+        "You can access station data with base + 'stations'.<br/>"
+        "Temperature observation data from the most recent year in the dataset is at base + 'tobs'<br/>"
+        "the final way to use this API is by inputting a start (and optionally and end date) after the base url with the format:<br/>"
+
+
+
+
         f"Available Routes:<br/>"
         f"<a href='/api/v1.0/precipitation'>precipitation</a><br/>"
         f"<a href='/api/v1.0/stations'>stations</a><br/>"
         f"<a href='/api/v1.0/tobs'>tobs</a><br/>"
-        f"<a href='/api/v1.0/start date to end date'>start_to_end</a>"
+        f"<a href='/api/v1.0/2017-01-01'>start</a>"
     )
 
 
@@ -97,7 +104,10 @@ def stations():
 def tobs():
     
     session = Session(engine)
+
     
+    # last_year = session.query(Measurements.date, Measurements.tobs).\
+    #     filter(Measurements.date >=)    
     last_year = session.query(Measurements.date, Measurements.tobs).filter(Measurements.date >= '2016-01-01').order_by(Measurements.date).all()
     
     # measurement_results = session.query(Measurements.station, Measurements.date,
@@ -134,20 +144,42 @@ def start_to_end():
 
     session = Session(engine)
     session.close()
+
 @app.route("/api/v1.0/<start>")
 def start_date(start):
     
     session = Session(engine)
+    
+    date_results = session.query(Measurements.date, func.min(Measurements.tobs), func.max(Measurements.tobs), func.avg(Measurements.tobs)).\
+        filter(Measurements.date >= start).all()
+    
+    dates = []
+    mins = []
+    maxs = []
+    avgs = []
 
-    measurement_results = session.query(Measurements.station, Measurements.date,
-        Measurements.prcp, Measurements.tobs).filter(Measurements.date >= start).all()
-    
-    
-    
+    for result in date_results:
+
+        date = result[0]
+        date_min = result[1]
+        date_max = result[2]
+        date_avg = result[3]
+
+        dates.append(date)
+        mins.append(date_min)
+        maxs.append(date_max)
+        avgs.append(date_avg)
+
+
     session.close()
-    print(measurement_results) 
 
-    return(measurement_results)
+    def convert(list):
+        return tuple(list)
+        
+    list = [dates, mins, maxs, avgs]
+    print(convert(list)) 
+
+    return jsonify(convert(list))
 
 
 if __name__ == '__main__':
