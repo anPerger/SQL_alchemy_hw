@@ -24,7 +24,12 @@ app = Flask(__name__)
 @app.route("/")
 def welcome():
     """List all available api routes."""
-    return (
+    return ("Welcome to my homepage! This is where I have information about this API.<br/>"
+            "the base route is '/api/v1.0/'<br/>"         
+        "You can access precipitation data in inches by date with the base route followed by 'precipitation'.<br/>"
+        "You can access station data with 'stations'.<br/>"
+        "Temperature observation data from the most recent year in the dataset is at 'tobs'<br/>"
+        "the final way to use this API is by inputting a "
         f"Available Routes:<br/>"
         f"<a href='/api/v1.0/precipitation'>precipitation</a><br/>"
         f"<a href='/api/v1.0/stations'>stations</a><br/>"
@@ -92,40 +97,57 @@ def stations():
 def tobs():
     
     session = Session(engine)
-
-    measurement_results = session.query(Measurements.station, Measurements.date,
-        Measurements.prcp, Measurements.tobs).all()
-  
-    measurement_dates = []
-    measurement_tobs = []
-    measurement_stations = []
     
-    for result in measurement_results:
+    last_year = session.query(Measurements.date, Measurements.tobs).filter(Measurements.date >= '2016-01-01').order_by(Measurements.date).all()
+    
+    # measurement_results = session.query(Measurements.station, Measurements.date,
+    #     Measurements.prcp, Measurements.tobs).all()
+    # measurement_frame = pd.DataFrame(measurement_results[:], columns=['station', 'date', 'prcp', 'tobs'])
+    # last_year = session.query(Measurements).filter_by(extract('year', Measurements.date), extract('month', Measurements.date)).last(12)
+    # measurement_results = session.query(Measurements.station, Measurements.date,
+    #     Measurements.prcp, Measurements.tobs).filter(Measurements.date >= ).all()
+    # measurement_dates = []
+    # measurement_tobs = []
+    # measurement_stations = []
+    
+    # for result in last_year:
         
-        measurement_date = result[1]
-        measurement_tob = result[3]
-        measurement_station = result[0]
+    #     measurement_date = result[1]
+    #     measurement_tob = result[3]
+    #     measurement_station = result[0]
 
-        measurement_dates.append(measurement_date)
-        measurement_tobs.append(measurement_tob)
-        measurement_stations.append(measurement_station)
+    #     measurement_dates.append(measurement_date)
+    #     measurement_tobs.append(measurement_tob)
+    #     measurement_stations.append(measurement_station)
     
-     tobs_dict = {}
-    for date in range(len(measurement_dates)):
-        tobs_dict[measurement_dates[date]] = measurement_tobs[date]
+    # tobs_dict = {}
+    # for date in range(len(measurement_dates)):
+    #     tobs_dict[measurement_dates[date]] = measurement_tobs[date]
     
-    print(tobs_dict)
+    
+    print(last_year)
 
-    return jsonify(tobs_dict)
+    return jsonify(last_year)
 
 @app.route("/api/v1.0/start_to_end")
 def start_to_end():
 
     session = Session(engine)
-
+    session.close()
+@app.route("/api/v1.0/<start>")
+def start_date(start):
     
+    session = Session(engine)
 
+    measurement_results = session.query(Measurements.station, Measurements.date,
+        Measurements.prcp, Measurements.tobs).filter(Measurements.date >= start).all()
+    
+    
+    
+    session.close()
+    print(measurement_results) 
 
+    return(measurement_results)
 
 
 if __name__ == '__main__':
